@@ -1,7 +1,7 @@
 /*
  * @Author: Y
  * @Date: 2021-12-17 23:17:17
- * @LastEditTime: 2021-12-23 22:14:25
+ * @LastEditTime: 2022-02-06 16:01:30
  * @LastEditors: Y
  * @Description:
  */
@@ -26,6 +26,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/entities/User';
 import { TokenGuard } from 'src/guards/token.guard';
 import { ValidationPipe } from 'src/pipe/validation.pipe';
+import { returnResponse } from 'src/utils/res';
 import { AuthService } from '../auth/auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login-user.dto';
@@ -42,7 +43,7 @@ export class UserController {
 
   @ApiOperation({ summary: '获取所有用户' })
   @Get()
-  @UseGuards(TokenGuard)
+  // @UseGuards(TokenGuard)
   @UseGuards(AuthGuard('jwt'))
   async findAll(@Query() query: { pageNum: number; pageSize: number }) {
     const res = await this.userService.findAll(query);
@@ -53,52 +54,63 @@ export class UserController {
         pageSize: query.pageSize,
       };
     } else {
-      throw new HttpException('未找到任何用户', HttpStatus.NOT_FOUND);
+      throw new HttpException('未找到任何用户', HttpStatus.BAD_REQUEST);
     }
   }
   @ApiOperation({ summary: '获取指定用户通过ID' })
   @Get(':id')
-  @UseGuards(TokenGuard)
+  // @UseGuards(TokenGuard)
   @UseGuards(AuthGuard('jwt'))
-  async findById(@Param('id') id: string): Promise<User> {
+  async findById(@Param('id') id: string): Promise<any> {
     const res = await this.userService.findById(id);
-    if (res) {
-      return res;
-    } else {
-      throw new HttpException('用户不存在', HttpStatus.NOT_FOUND);
+    try {
+      if (res) {
+        return returnResponse('1', '查找成功', res);
+      } else {
+        return returnResponse('0', '未找到用户');
+      }
+    } catch (error) {
+      return returnResponse('-1', '查找失败');
     }
   }
   @ApiOperation({ summary: '获取指定用户通过用户名' })
   @Get('/name/:username')
-  @UseGuards(TokenGuard)
-  @UseGuards(AuthGuard('jwt')) // 使用 'JWT' 进行验证
+  // @UseGuards(TokenGuard)
+  // @UseGuards(AuthGuard('jwt')) // 使用 'JWT' 进行验证
   async findByName(
     @Param('username') username: string,
     @Req() req,
-  ): Promise<User> {
+  ): Promise<any> {
     const res = await this.userService.findByName(username);
-    console.log(req.user);
-    if (res) {
-      return res;
-    } else {
-      throw new HttpException('用户不存在', HttpStatus.NOT_FOUND);
+    try {
+      if (res) {
+        return returnResponse('1', '查找成功', res);
+      } else {
+        return returnResponse('0', '未找到用户');
+      }
+    } catch (error) {
+      return returnResponse('-1', '查找失败');
     }
   }
   @ApiOperation({ summary: '注册用户' })
   @Post('')
   @UsePipes(new ValidationPipe()) // 使用管道验证
-  async register(@Body() info: CreateUserDto): Promise<User> {
-    const res = await this.userService.create(info);
-    if (res) {
-      return res;
-    } else {
-      throw new HttpException('用户已存在,注册失败', HttpStatus.BAD_REQUEST);
+  async register(@Body() info: CreateUserDto): Promise<any> {
+    try {
+      const res = await this.userService.create(info);
+      if (res) {
+        return returnResponse('1', '注册成功', res);
+      } else {
+        return returnResponse('0', '注册失败');
+      }
+    } catch (error) {
+      return returnResponse('-1', '注册失败');
     }
   }
   @ApiOperation({ summary: '更新用户信息' })
   @Put(':id')
   @UsePipes(new ValidationPipe()) // 使用管道验证
-  @UseGuards(TokenGuard)
+  // @UseGuards(TokenGuard)
   @UseGuards(AuthGuard('jwt'))
   async updateUserById(
     @Body() updateInfo: UpdateUserDto,
@@ -106,7 +118,7 @@ export class UserController {
   ): Promise<any> {
     const oldValue = await this.userService.findById(id);
     if (!oldValue) {
-      throw new HttpException(`id为${id}的用户不存在`, HttpStatus.NOT_FOUND);
+      throw new HttpException(`id为${id}的用户不存在`, HttpStatus.BAD_REQUEST);
     }
     const updatedRes = await this.userService.update(oldValue, updateInfo);
     if (updatedRes.affected == 0) {
@@ -115,7 +127,7 @@ export class UserController {
   }
   @ApiOperation({ summary: '删除用户' })
   @Delete(':id')
-  @UseGuards(TokenGuard)
+  // @UseGuards(TokenGuard)
   @UseGuards(AuthGuard('jwt'))
   async remove(@Param('id') id: string): Promise<any> {
     const res = await this.userService.remove(id);
@@ -132,14 +144,28 @@ export class UserController {
   // // JWT验证 - Step 1: 用户请求登录
   async login(@Body() user: LoginDto): Promise<any> {
     console.log('JWT验证 - Step 1: 用户请求登录');
-    const authResult = await this.authService.validateUser(
-      user.userName,
-      user.password,
-    );
-    if (authResult) {
-      return this.authService.certificate(authResult);
-    } else {
-      throw new HttpException('用户名或密码错误', HttpStatus.BAD_REQUEST);
+    try {
+      const authResult = await this.authService.validateUser(
+        user.userName,
+        user.password,
+        user.code,
+        user.id,
+      );
+      if (authResult && typeof authResult != 'string') {
+        return returnResponse(
+          '1',
+          '登录成功',
+          await this.authService.certificate(authResult),
+        );
+      } else {
+        if (typeof authResult == 'string') {
+          return returnResponse('0', authResult);
+        } else {
+          return returnResponse('0', '用户名或密码错误');
+        }
+      }
+    } catch (error) {
+      return returnResponse('-1', '登录失败');
     }
   }
 }

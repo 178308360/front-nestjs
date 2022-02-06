@@ -1,7 +1,7 @@
 /*
  * @Author: Y
  * @Date: 2021-12-17 22:58:26
- * @LastEditTime: 2021-12-23 17:22:11
+ * @LastEditTime: 2022-02-04 00:21:38
  * @LastEditors: Y
  * @Description:
  */
@@ -10,7 +10,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './module/user/user.module';
 import { AuthModule } from './module/auth/auth.module';
 import { UserController } from './module/user/user.controller';
+import { ColorPickModule } from './module/color-pick/color-pick.module';
 import dbConfig from './config/db';
+import { ColorPickController } from './module/color-pick/color-pick.controller';
 @Module({
   imports: [
     UserModule,
@@ -25,8 +27,9 @@ import dbConfig from './config/db';
       autoLoadEntities: true,
     }),
     AuthModule,
+    ColorPickModule,
   ],
-  controllers: [UserController],
+  controllers: [UserController, ColorPickController],
   providers: [],
 })
 export class AppModule {}

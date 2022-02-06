@@ -1,7 +1,7 @@
 /*
  * @Author: Y
  * @Date: 2021-12-17 22:58:26
- * @LastEditTime: 2021-12-23 21:17:21
+ * @LastEditTime: 2022-01-26 13:45:57
  * @LastEditors: Y
  * @Description:
  */
@@ -10,9 +10,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import * as express from 'express';
-import { HttpExceptionFilter } from './filter/http-exception.filter';
 import { TransformInterceptor } from './interceptor/transform.interceptor';
-import { logger } from './middleware/logger.middleware';
 import { AllExceptionsFilter } from './filter/any-exception.filter';
 
 async function bootstrap() {
@@ -20,13 +18,8 @@ async function bootstrap() {
   // 设置全局路由前缀
   app.setGlobalPrefix('api');
 
-  app.use(express.json()); // For parsing application/json
-  app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
-  // 监听所有的请求路由，并打印日志
-  app.use(logger);
   // 注册全局错误的过滤器
   app.useGlobalFilters(new AllExceptionsFilter());
-  app.useGlobalFilters(new HttpExceptionFilter());
   // 全局注册拦截器 先进后出
   //处理成功时返回结果
   app.useGlobalInterceptors(new TransformInterceptor());
@@ -41,6 +34,8 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
-  await app.listen(3000);
+  //开启跨域请求
+  app.enableCors();
+  await app.listen(3001);
 }
 bootstrap();

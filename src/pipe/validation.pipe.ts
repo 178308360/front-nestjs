@@ -1,7 +1,7 @@
 /*
  * @Author: Y
  * @Date: 2021-12-19 21:56:00
- * @LastEditTime: 2021-12-22 22:09:54
+ * @LastEditTime: 2022-01-03 21:08:24
  * @LastEditors: Y
  * @Description:
  */
@@ -18,7 +18,7 @@ import { plainToClass } from 'class-transformer';
 @Injectable()
 export class ValidationPipe implements PipeTransform {
   async transform(value: any, { metatype }: ArgumentMetadata) {
-    // console.log(`value:`, value, 'metatype: ', metatype);
+    console.log(`value:`, value, 'metatype: ', metatype);
     if (!metatype || !this.toValidate(metatype)) {
       // 如果没有传入验证规则，则不验证，直接返回数据
       return value;

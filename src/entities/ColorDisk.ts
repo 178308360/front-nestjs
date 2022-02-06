@@ -1,11 +1,12 @@
 /*
  * @Author: Y
  * @Date: 2021-12-17 23:26:51
- * @LastEditTime: 2021-12-23 08:45:50
+ * @LastEditTime: 2022-02-04 00:08:20
  * @LastEditors: Y
  * @Description:
  */
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { formatTime } from './valueTransformer';
 
 @Entity('color_disk', { schema: 'front' })
 export class ColorDisk {
@@ -60,9 +61,17 @@ export class ColorDisk {
   @Column('int', { name: 'hot_view', nullable: true, default: () => "'0'" })
   hotView: number | null;
 
-  @Column('datetime', { name: 'createdAt', nullable: true })
-  createdAt: Date | null;
+  @Column('datetime', {
+    name: 'create_time',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: formatTime,
+  })
+  createTime: Date;
 
-  @Column('datetime', { name: 'updatedAt', nullable: true })
-  updatedAt: Date | null;
+  @Column('datetime', {
+    name: 'update_time',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: formatTime,
+  })
+  updateTime: Date;
 }
