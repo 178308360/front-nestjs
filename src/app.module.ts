@@ -1,7 +1,7 @@
 /*
  * @Author: Y
  * @Date: 2021-12-17 22:58:26
- * @LastEditTime: 2022-02-04 00:21:38
+ * @LastEditTime: 2022-02-07 23:52:38
  * @LastEditors: Y
  * @Description:
  */
@@ -24,6 +24,7 @@ import { ColorPickController } from './module/color-pick/color-pick.controller';
       password: dbConfig.mysql.password,
       database: dbConfig.mysql.database,
       timezone: '+08:00', // 东八时区
+      logging: true,
       autoLoadEntities: true,
     }),
     AuthModule,

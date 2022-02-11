@@ -1,7 +1,7 @@
 /*
  * @Author: Y
  * @Date: 2021-12-17 23:17:17
- * @LastEditTime: 2022-02-06 16:01:30
+ * @LastEditTime: 2022-02-06 23:20:58
  * @LastEditors: Y
  * @Description:
  */
@@ -44,23 +44,29 @@ export class UserController {
   @ApiOperation({ summary: '获取所有用户' })
   @Get()
   // @UseGuards(TokenGuard)
-  @UseGuards(AuthGuard('jwt'))
-  async findAll(@Query() query: { pageNum: number; pageSize: number }) {
+  // @UseGuards(AuthGuard('jwt'))
+  async findAll(
+    @Query() query: { pageNum: number; pageSize: number },
+  ): Promise<any> {
     const res = await this.userService.findAll(query);
-    if (res.length > 0) {
-      return {
-        users: res,
-        pageNum: query.pageNum,
-        pageSize: query.pageSize,
-      };
-    } else {
-      throw new HttpException('未找到任何用户', HttpStatus.BAD_REQUEST);
+    try {
+      if (res.length > 0) {
+        return returnResponse('1', '查找成功', {
+          users: res,
+          pageNum: query.pageNum,
+          pageSize: query.pageSize,
+        });
+      } else {
+        return returnResponse('0', '未找到用户');
+      }
+    } catch (error) {
+      return returnResponse('-1', '查找失败');
     }
   }
   @ApiOperation({ summary: '获取指定用户通过ID' })
   @Get(':id')
   // @UseGuards(TokenGuard)
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
   async findById(@Param('id') id: string): Promise<any> {
     const res = await this.userService.findById(id);
     try {

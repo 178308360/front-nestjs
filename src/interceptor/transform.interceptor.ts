@@ -1,7 +1,7 @@
 /*
  * @Author: Y
  * @Date: 2021-12-17 23:59:16
- * @LastEditTime: 2022-01-26 15:57:33
+ * @LastEditTime: 2022-02-07 23:57:50
  * @LastEditors: Y
  * @Description:"拦截成功的返回数据"
  */
@@ -22,7 +22,6 @@ export class TransformInterceptor implements NestInterceptor {
     const req = context.getArgByIndex(1).req;
     return next.handle().pipe(
       map((data) => {
-        console.log(data);
         const logFormat = ` <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         Request original url: ${req.originalUrl}
         Method: ${req.method}
